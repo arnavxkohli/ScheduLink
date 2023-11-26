@@ -1,4 +1,4 @@
-use axum::Json;
+use axum::{Json, http::StatusCode};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -14,17 +14,21 @@ pub struct PossibleTimes{
     end: chrono::NaiveDateTime
 }
 
-#[derive(Debug, Deserialize)]
-pub struct PostResponse{
-    status: String
-}
+pub async fn event_post(request: Json<PostRequest>) -> Result<String, StatusCode> {
 
-pub async fn event_post(Json(request): Json<PostRequest>){
-    println!("Event Name: {}", request.event_name);
-    println!("User Name: {}", request.user_name);
-    for possible_time in request.possible_times{
-        println!("Possible Time: {} - {}", possible_time.start, possible_time.end);
+    if request.event_name.is_empty() || request.user_name.is_empty() {
+        return Err(StatusCode::BAD_REQUEST);
+    } else {
+        for possible_time in &request.possible_times {
+            if possible_time.start > possible_time.end {
+                return Err(StatusCode::BAD_REQUEST);
+            }
+        }
     }
+
+    // Handle creating event in DB here
+
+    Ok("Success".to_string())
 }
 
 pub async fn event_get() -> &'static str {
