@@ -1,3 +1,4 @@
+#![allow(non_snake_case)]
 mod handlers;
 use axum::{Router, routing::get, routing::post, routing::put, routing::delete};
 
@@ -10,10 +11,10 @@ async fn main() {
     // Routes defined for the app
     let app = Router::new()
     .route("/", get(handlers::base::base))
-    .route("/api/event", get(handlers::event::event_get))
-    .route("/api/event", post(handlers::event::event_post))
-    .route("/api/event", put(handlers::event::event_put))
-    .route("/api/event", delete(handlers::event::event_delete));
+    .route("/api/event", get(handlers::event::get::get))
+    .route("/api/event", post(handlers::event::post::post))
+    .route("/api/event", put(handlers::event::put::put))
+    .route("/api/event", delete(handlers::event::delete::delete));
 
     // Serve the app asynchronously
     axum::Server::bind(&addr.parse().unwrap())
