@@ -1,5 +1,7 @@
-use axum::{Json, http::StatusCode, response::{IntoResponse, Response}};
+use axum::{Json, http::StatusCode};
 use serde::Deserialize;
+use crate::handlers::event::app_error::AppError;
+use crate::handlers::event::date_time::{PossibleTimes, is_valid_datetime};
 
 #[derive(Debug, Deserialize)]
 pub struct Request{
@@ -8,34 +10,6 @@ pub struct Request{
     description: String,
     priority: String,
     possible_times: Vec<PossibleTimes>
-}
-
-#[derive(Debug, Deserialize)]
-pub struct PossibleTimes{
-    start: String,
-    end: String
-}
-
-#[derive(Debug)]
-pub struct AppError{
-    message: String,
-    status: StatusCode
-}
-
-impl IntoResponse for AppError{
-    fn into_response(self) -> Response {
-        (self.status, self.message).into_response()
-    }
-}
-
-fn is_valid_datetime(time: String) -> Result<chrono::NaiveDateTime, AppError>{
-    match chrono::NaiveDateTime::parse_from_str(&time, "%Y-%m-%dT%H:%M:%S"){
-        Ok(parsed_datetime) => Ok(parsed_datetime),
-        Err(_) => Err(AppError {
-            message: "Invalid Date - Time format for {time}".to_string(),
-            status: StatusCode::BAD_REQUEST
-        })
-    }
 }
 
 pub async fn post(Json(request): Json<Request>) -> Result<String, AppError> {
